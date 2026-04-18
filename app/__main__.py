@@ -1,12 +1,13 @@
+from app.schema.UsuarioValidate import UsuarioValidate
+from app.schema.VentasValidate import VentasValidate
 from app.service.UsuarioService import UsuarioService
 from app.service.VentaService import VentaService
 
 
 def menu_ventas():
     servicio = VentaService()
-
     while True:
-        print("   SISTEMA DE VENTAS")
+        print("\n   SISTEMA DE VENTAS")
         print("1. Mostrar todas las ventas")
         print("2. Ordenar por valor (Menor a Mayor)")
         print("3. Buscar venta por ID")
@@ -18,67 +19,100 @@ def menu_ventas():
 
         if opcion == "1":
             servicio.mostrar_ventas()
-
         elif opcion == "2":
             servicio.ordenar_por_valor()
             print("Ventas ordenadas correctamente.")
-
         elif opcion == "3":
-            id_buscada = int(input("Ingresa el ID de la venta: "))
-            venta = servicio.buscar_por_id(id_buscada)
-            print(venta if venta else "Venta no encontrada.")
-
+            try:
+                id_b = int(input("ID de la venta: "))
+                v = servicio.buscar_por_id(id_b)
+                print(v if v else "No encontrada.")
+            except ValueError:
+                print("ID inválido.")
         elif opcion == "4":
-            id_eliminar = int(input("Ingresa el ID a eliminar: "))
-            mensaje = servicio.eliminar_venta(id_eliminar)
-            print(mensaje)
-
+            try:
+                id_e = int(input("ID a eliminar: "))
+                print(servicio.eliminar_venta(id_e))
+            except ValueError:
+                print("ID inválido.")
         elif opcion == "5":
-            id = input("Id de la venta: ")
-            nombre = input("Nombre cliente: ")
-            mesa = int(input("Mesa: "))
-            plato = input("Plato principal: ")
-            valor = float(input("Valor consumo: "))
-            pago = input("Método (EFECTIVO/TARJETA/TRANSFERENCIA): ").upper()
+            try:
+                id_v = int(input("Id: "))
+                nom = input("Cliente: ")
+                mes = int(input("Mesa: "))
+                pla = input("Plato: ")
+                val = float(input("Valor: "))
+                pag = input("Método: ").upper()
 
-            mensaje = servicio.agregar_venta(id, nombre, mesa, plato, valor, pago)
-            print(mensaje)
-
+                datos_v = VentasValidate(
+                    id=id_v,
+                    nombre_cliente=nom,
+                    numero_mesa=mes,
+                    plato_principal=pla,
+                    valor_consumo=val,
+                    metodo_pago=pag,
+                    estado_pedido="PENDIENTE",
+                )
+                print(servicio.agregar_venta(datos_v))
+            except Exception as e:
+                print(f"Error: {e}")
         elif opcion == "0":
-            print("Saliendo del sistema...")
             break
-
-        else:
-            print("Opción no válida, intenta de nuevo.")
 
 
 def menu_usuario():
     servicio = UsuarioService()
     while True:
-        print("   Registro   ")
+        print("\n   SISTEMA DE USUARIOS   ")
         print("1. Registrarse")
         print("2. Logueo")
         print("3. Salir")
 
         opcion = input("\n Seleccione una opcion: ")
+
         if opcion == "1":
-            servicio.registrar()
+            try:
+                u_name = input("Nombre de usuario: ")
+                u_pass = input("Contraseña: ")
+                u_mail = input("Email: ")
+
+                datos_reg = UsuarioValidate(
+                    username=u_name, contraseña=u_pass, correo=u_mail
+                )
+                print(servicio.registrar(datos_reg))
+            except Exception as e:
+                print(f"Error de registro: {e}")
+
         elif opcion == "2":
-            servicio.login()
-            print("1. Gestionar ventas del restaurante")
-            print("2. Salir")
-            while True:
-                ver_menu_ventas = input("\n Seleccione una opcion")
-                if ver_menu_ventas == "1":
-                    menu_ventas()
-                elif ver_menu_ventas == "2":
-                    print("Saliendo")
-                    break
+            try:
+                # Cambiamos 'Usuario' por 'Email' para el login
+                email_login = input("Email: ")
+                pass_login = input("Contraseña: ")
+
+                # Para el login, enviamos un username genérico si el esquema lo pide,
+                # pero usamos el email real ingresado.
+                datos_log = UsuarioValidate(
+                    username="usuario_login", contraseña=pass_login, correo=email_login
+                )
+
+                if servicio.login(datos_log):
+                    print("\n--- ACCESO CONCEDIDO ---")
+                    while True:
+                        print("\n1. Gestionar ventas")
+                        print("2. Cerrar Sesión")
+                        op = input("\n Seleccione: ")
+                        if op == "1":
+                            menu_ventas()
+                        elif op == "2":
+                            break
                 else:
-                    print("Opcion no valida")
+                    print("Credenciales incorrectas.")
+            except Exception as e:
+                print(f"Error de formato: {e}")
+
         elif opcion == "3":
-            print("Saliendo del sistema.")
             break
 
 
-menu_usuario()
+if __name__ == "__main__":
+    menu_usuario()
