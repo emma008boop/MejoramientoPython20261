@@ -9,7 +9,8 @@ class UsuarioService:
     def registrar(self, datos: UsuarioValidate):
         nuevo_usuario = Usuario(datos.correo, datos.contraseña)
         self.usuarios_registrados.append(nuevo_usuario)
-        return f"Usuario con email: {datos.correo}. Creado"
+        print(f"Usuario con email: {datos.correo}. Creado")
+        return True
 
     def login(self, datos: UsuarioValidate):
         intentos = 4
@@ -21,7 +22,7 @@ class UsuarioService:
             return f"Correo {datos.correo} no existe"
         intentos = 4
         if usuario_encontrado.contraseña == datos.contraseña:
-            return "Login exitoso"
+            return True
         else:
             intentos -= 1
             if intentos > 0:
